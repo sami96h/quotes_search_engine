@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quotes</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+        color: #333;
+      }
+
+      h1 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 20px;
+      }
+
+      .search-container {
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .search-box {
+        width: 100%;
+        max-width: 500px;
+        padding: 12px 20px;
+        font-size: 16px;
+        border: 2px solid #ddd;
+        border-radius: 25px;
+        outline: none;
+        transition: border-color 0.3s;
+      }
+
+      .search-box:focus {
+        border-color: #3498db;
+      }
+
+      .quotes-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .quote-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        transition: transform 0.3s ease;
+      }
+
+      .quote-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .quote-text {
+        font-size: 18px;
+        line-height: 1.6;
+        margin-bottom: 10px;
+        position: relative;
+        padding-left: 20px;
+        font-style: italic;
+      }
+
+      .quote-text::before {
+        content: '"';
+        font-size: 40px;
+        color: #3498db;
+        position: absolute;
+        left: 0;
+        top: -10px;
+      }
+
+      .quote-author {
+        text-align: right;
+        font-weight: bold;
+        color: #3498db;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Quotes</h1>
+
+    <div class="search-container">
+      <input
+        type="text"
+        class="search-box"
+        id="searchInput"
+        placeholder="Search quotes .. "
+        oninput="filterQuotes()"
+      />
+    </div>
+
+    <div class="quotes-container" id="quotesContainer"></div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (localStorage.getItem("quotes")) {
+          return;
+        }
+
+        axios
+          .get("https://dummyjson.com/quotes")
+          .then((response) => {
+            localStorage.setItem(
+              "quotes",
+              JSON.stringify(response.data.quotes)
+            );
+          })
+          .catch((error) => {
+            Toastify({
+              text: "Internal server error!",
+              duration: 3000,
+              gravity: "top",
+              position: "center",
+              backgroundColor: "linear-gradient(to right, #e74c3c, #c0392b)",
+            }).showToast();
+
+          });
+      });
+
+      const renderQuotes = (quotes) => {
+        const container = document.getElementById("quotesContainer");
+        container.innerHTML = "";
+
+        quotes.forEach((quote) => {
+          const quoteCard = document.createElement("div");
+          quoteCard.className = "quote-card";
+
+          quoteCard.innerHTML = `
+                    <p class="quote-text">${quote.quote}</p>
+                    <p class="quote-author">— ${quote.author}</p>
+                `;
+
+          container.appendChild(quoteCard);
+        });
+      };
+
+      const filterQuotes = () => {
+        if (!localStorage.getItem("quotes")) {
+            Toastify({
+              text: "No data found!",
+              duration: 3000,
+              gravity: "top",
+              position: "center",
+              backgroundColor: "linear-gradient(to right, #e74c3c, #c0392b)",
+            }).showToast();
+          return;
+        }
+
+        const searchTerm = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        // if (searchTerm.length == 0) {
+        //   renderQuotes([]);
+        //   return;
+        // }
+        const quotes = JSON.parse(localStorage.getItem("quotes"));
+
+        let matchedQuotes = [];
+
+        quotes.forEach((quote) => {
+          if (quote.quote.toLowerCase().includes(searchTerm)) {
+            matchedQuotes = [...matchedQuotes, quote];
+          }
+        });
+
+        renderQuotes(matchedQuotes);
+      };
+    </script>
+  </body>
+</html>
