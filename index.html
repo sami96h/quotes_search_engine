@@ -85,6 +85,28 @@
       .hidden {
         display: none;
       }
+
+      /* Spinner Styles */
+      .spinner-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+      }
+      
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
     </style>
   </head>
   <body>
@@ -100,6 +122,10 @@
       />
     </div>
 
+    <div id="spinnerContainer" class="spinner-container">
+      <div class="spinner"></div>
+    </div>
+
     <div class="quotes-container" id="quotesContainer"></div>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link
@@ -109,10 +135,16 @@
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        const spinnerContainer = document.getElementById("spinnerContainer");
+        
         if (localStorage.getItem("quotes")) {
+          spinnerContainer.style.display = "none";
+          filterQuotes();
           return;
         }
 
+        spinnerContainer.style.display = "flex";
+        
         axios
           .get("https://dummyjson.com/quotes")
           .then((response) => {
@@ -120,8 +152,11 @@
               "quotes",
               JSON.stringify(response.data.quotes)
             );
+            spinnerContainer.style.display = "none";
+            filterQuotes();
           })
           .catch((error) => {
+            spinnerContainer.style.display = "none";
             Toastify({
               text: "Internal server error!",
               duration: 3000,
@@ -129,7 +164,6 @@
               position: "center",
               backgroundColor: "linear-gradient(to right, #e74c3c, #c0392b)",
             }).showToast();
-
           });
       });
 
